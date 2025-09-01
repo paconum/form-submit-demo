@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ส่งข้อความและรูปภาพ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 50px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      max-width: 400px;
+      gap: 15px;
+    }
+    input, textarea, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>ส่งข้อความและรูปภาพ</h2>
+  <form id="myForm">
+    <label>หัวข้อ:</label>
+    <input type="text" name="topic" required>
+
+    <label>ข้อความ:</label>
+    <textarea name="message" rows="4" required></textarea>
+
+    <label>เลือกรูปภาพ:</label>
+    <input type="file" name="file" accept="image/*" required>
+
+    <button type="submit">ส่งข้อมูล</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script>
+    const form = document.getElementById("myForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = document.getElementById("status");
+      status.textContent = "กำลังส่ง...";
+
+      const formData = new FormData(form);
+
+      try {
+        // 👉 ตรงนี้ให้ใส่ URL ของ Google Apps Script Web App
+        const response = await fetch("YOUR_APPS_SCRIPT_WEBAPP_URL", {
+          method: "POST",
+          body: formData
+        });
+
+        if (response.ok) {
+          status.textContent = "ส่งข้อมูลสำเร็จ 🎉";
+          form.reset();
+        } else {
+          status.textContent = "เกิดข้อผิดพลาด ❌";
+        }
+      } catch (error) {
+        status.textContent = "เชื่อมต่อไม่สำเร็จ ❌";
+      }
+    });
+  </script>
+</body>
+</html>
