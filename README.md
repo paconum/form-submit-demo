@@ -10,7 +10,7 @@
     input, textarea, select, button { padding: 8px; font-size: 16px; }
     button { cursor: pointer; background-color: #007bff; color: #fff; border: none; border-radius: 6px; }
     #preview { max-width: 200px; margin-top: 10px; display: none; }
-    #status { margin-top: 10px; font-weight: bold; }
+    #status { margin-top: 10px; font-weight: bold; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -37,7 +37,7 @@
   <div id="status"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVh5sTBEy0B6E9Ysh976IOjD30bSI0OCbs_d_7B3u4XgfqG6drJPti_avRCdlgFZRp-A/exec";// <-- ใส่ URL ของ Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVh5sTBEy0B6E9Ysh976IOjD30bSI0OCbs_d_7B3u4XgfqG6drJPti_avRCdlgFZRp-A/exec"; // <-- URL Web App
 
     const form = document.getElementById("myForm");
     const fileInput = document.getElementById("file");
@@ -47,9 +47,11 @@
     // แสดงตัวอย่างรูป
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
-      if (!file) { preview.style.display = 'none'; return; }
-      const url = URL.createObjectURL(file);
-      preview.src = url;
+      if (!file) { 
+        preview.style.display = 'none'; 
+        return; 
+      }
+      preview.src = URL.createObjectURL(file);
       preview.style.display = "block";
     });
 
@@ -59,7 +61,10 @@
       const topic = document.getElementById("topic").value;
       const message = document.getElementById("message").value;
       const file = fileInput.files[0];
-      if (!file) { statusEl.textContent = "กรุณาเลือกไฟล์"; return; }
+      if (!file) { 
+        statusEl.textContent = "กรุณาเลือกไฟล์"; 
+        return; 
+      }
 
       const reader = new FileReader();
       reader.onloadend = async () => {
@@ -73,16 +78,34 @@
 
         try {
           const res = await fetch(SCRIPT_URL, { method: "POST", body: data });
-          const json = await res.json();
-          if (json.ok) {
-            statusEl.textContent = "ส่งข้อมูลสำเร็จ! ลิงก์ไฟล์: " + json.fileUrl;
-            form.reset();
-            preview.style.display = "none";
-          } else {
-            statusEl.textContent = "เกิดข้อผิดพลาด: " + json.message;
+          const text = await res.text();
+          let parsed = null;
+          try { parsed = JSON.parse(text); } catch(e) { /* ไม่ใช่ JSON */ }
+
+          if (!res.ok) {
+            statusEl.textContent = `HTTP ${res.status} ${res.statusText} — ${text}`;
+            console.log('Response text:', text);
+            return;
           }
+
+          if (parsed) {
+            if (parsed.ok) {
+              statusEl.textContent = "ส่งข้อมูลสำเร็จ! ลิงก์ไฟล์: " + parsed.fileUrl;
+              form.reset();
+              preview.style.display = "none";
+            } else {
+              statusEl.textContent = "เกิดข้อผิดพลาด: " + (parsed.message || text) + "\n" +
+                                     (parsed.stack ? parsed.stack : '');
+              console.log('Parsed error details:', parsed);
+            }
+          } else {
+            statusEl.textContent = "ได้ response (ไม่ใช่ JSON): " + text;
+            console.log('Raw response:', text);
+          }
+
         } catch (err) {
-          statusEl.textContent = "ไม่สามารถเชื่อมต่อได้";
+          statusEl.textContent = "ไม่สามารถเชื่อมต่อ (network): " + err.message;
+          console.log(err);
         }
       };
       reader.readAsDataURL(file);
