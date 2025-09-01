@@ -37,8 +37,7 @@
   <div id="status"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVh5sTBEy0B6E9Ysh976IOjD30bSI0OCbs_d_7B3u4XgfqG6drJPti_avRCdlgFZRp-A/exec";
- // <-- ใส่ URL ของ Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVh5sTBEy0B6E9Ysh976IOjD30bSI0OCbs_d_7B3u4XgfqG6drJPti_avRCdlgFZRp-A/exec";// <-- ใส่ URL ของ Google Apps Script
 
     const form = document.getElementById("myForm");
     const fileInput = document.getElementById("file");
